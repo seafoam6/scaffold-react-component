@@ -1,17 +1,19 @@
-const path = require('path');
-const chalk = require('chalk');
-const util = require('./util.js');
-const log = require('./log.js');
+const path = require("path");
+const chalk = require("chalk");
+const util = require("./util.js");
+const log = require("./log.js");
 
 const StubName = "__NAME__";
 const StubNameLowerCamel = "__NAME_LOWER_CAMEL__";
+const StubLowerkebab = "__NAME_LOWER_KEBAB__";
+
 const StubStoryBookType = "__SB_TYPE__";
 
-const ComponentClassSrcPath = 'template/component-class.js';
-const ComponentFunctionalSrcPath = 'template/component-functional.js';
-const StyleSrcPath = 'template/component.module.scss';
-const StorySrcPath = 'template/component.stories.js';
-const TestSrcPath = 'template/component.test.js';
+const ComponentClassSrcPath = "template/component-class.js";
+const ComponentFunctionalSrcPath = "template/component-functional.js";
+const StyleSrcPath = "template/component.module.scss";
+const StorySrcPath = "template/component.stories.js";
+const TestSrcPath = "template/component.test.js";
 
 const ComponentTargetPath = (name) => `${name}.js`;
 const StyleTargetPath = (name) => `${name}.module.scss`;
@@ -24,11 +26,12 @@ const TestTargetPath = (name) => `${name}.test.js`;
  * @param {*} storybookType Storybook type/category
  */
 const ConstructMap = (name, storybookType) => {
-    return {
-        [StubName] : name,
-        [StubNameLowerCamel]: util.toCamelCase(name),
-        [StubStoryBookType]: storybookType
-    }
+  return {
+    [StubName]: name,
+    [StubNameLowerCamel]: util.toCamelCase(name),
+    [StubLowerkebab]: util.toKebabCase(name),
+    [StubStoryBookType]: storybookType,
+  };
 };
 
 /**
@@ -38,63 +41,77 @@ const ConstructMap = (name, storybookType) => {
  * @param {string} storybookType Storybook type/category
  */
 const Scaffold = async (name, type, storybookType) => {
+  log.info(`Scaffolding component ${name} (${type})`);
 
-    log.info(`Scaffolding component ${name} (${type})`);
-    
-    const directory = util.toKebabCase(name);
-    const targetPath = await util.checkAndCreateTargetPath(directory);
-    
-    const component = ComponentTargetPath(name);
-    const componentPath = path.resolve(targetPath, component);
-    const map = ConstructMap(name, storybookType);
+  const directory = name;
+  const targetPath = await util.checkAndCreateTargetPath(directory);
 
-    // React component
-    switch(type){
-        case 'functional':
-            await util.readReplaceWriteAsync(
-                path.resolve(__dirname, ComponentFunctionalSrcPath), 
-                componentPath, 
-                map
-            );
-            log.ok(`Created functional component ${chalk.green.underline.bold(component)}`);
-            break;
+  const component = ComponentTargetPath(name);
+  const componentPath = path.resolve(targetPath, component);
+  const map = ConstructMap(name, storybookType);
 
-        case 'class':
-            await util.readReplaceWriteAsync(
-                path.resolve(__dirname, ComponentClassSrcPath), 
-                componentPath, 
-                map
-            );
-            log.ok(`Created class component ${chalk.green.underline.bold(component)}`);
-            break;
-    }
-
-    // SCSS
-    await util.readReplaceWriteAsync(
-        path.resolve(__dirname, StyleSrcPath), 
-        path.resolve(targetPath, StyleTargetPath(name)), 
+  // React component
+  switch (type) {
+    case "functional":
+      await util.readReplaceWriteAsync(
+        path.resolve(__dirname, ComponentFunctionalSrcPath),
+        componentPath,
         map
-    );
-    log.ok(`Created SCSS module for component ${chalk.green.underline.bold(StyleTargetPath(name))}`);
+      );
+      log.ok(
+        `Created functional component ${chalk.green.underline.bold(component)}`
+      );
+      break;
 
-    // Story
-    await util.readReplaceWriteAsync(
-        path.resolve(__dirname, StorySrcPath), 
-        path.resolve(targetPath, StoryTargetPath(name)), 
+    case "class":
+      await util.readReplaceWriteAsync(
+        path.resolve(__dirname, ComponentClassSrcPath),
+        componentPath,
         map
-    );
-    log.ok(`Created Story for component ${chalk.green.underline.bold(StoryTargetPath(name))}`);
+      );
+      log.ok(
+        `Created class component ${chalk.green.underline.bold(component)}`
+      );
+      break;
+  }
 
-    // Test
-    await util.readReplaceWriteAsync(
-        path.resolve(__dirname, TestSrcPath), 
-        path.resolve(targetPath, TestTargetPath(name)), 
-        map
-    );
-    log.ok(`Created Test for component ${chalk.green.underline.bold(TestTargetPath(name))}`);
+  // SCSS
+  await util.readReplaceWriteAsync(
+    path.resolve(__dirname, StyleSrcPath),
+    path.resolve(targetPath, StyleTargetPath(name)),
+    map
+  );
+  log.ok(
+    `Created SCSS module for component ${chalk.green.underline.bold(
+      StyleTargetPath(name)
+    )}`
+  );
 
-    return componentPath;
-}
+  // Story
+  await util.readReplaceWriteAsync(
+    path.resolve(__dirname, StorySrcPath),
+    path.resolve(targetPath, StoryTargetPath(name)),
+    map
+  );
+  log.ok(
+    `Created Story for component ${chalk.green.underline.bold(
+      StoryTargetPath(name)
+    )}`
+  );
 
- module.exports = { Scaffold };
-    
+  // Test
+  await util.readReplaceWriteAsync(
+    path.resolve(__dirname, TestSrcPath),
+    path.resolve(targetPath, TestTargetPath(name)),
+    map
+  );
+  log.ok(
+    `Created Test for component ${chalk.green.underline.bold(
+      TestTargetPath(name)
+    )}`
+  );
+
+  return componentPath;
+};
+
+module.exports = { Scaffold };
