@@ -1,6 +1,8 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import __NAME__ from './__NAME__';
-import styles from './__NAME__.module.scss';
+import React from "react";
+import render from "react-test-renderer";
+import __NAME__ from "./__NAME__";
 
-test.todo('__NAME__ renders succesfully');
+it("renders correctly", () => {
+  const tree = render.create(<__NAME__ />).toJSON();
+  expect(tree).toMatchSnapshot();
+});
